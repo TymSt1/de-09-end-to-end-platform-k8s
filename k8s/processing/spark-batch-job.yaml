@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: spark-batch-process
+  namespace: processing
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app: spark-batch
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: spark
+          image: taxi-spark:latest
+          imagePullPolicy: Never
+          env:
+            - name: S3_ENDPOINT
+              value: "http://localstack.data.svc.cluster.local:4566"
+            - name: RAW_BUCKET
+              value: "platform-raw-data"
+            - name: PROCESSED_BUCKET
+              value: "platform-processed-data"
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"

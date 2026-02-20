@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: taxi-producer
+  namespace: streaming
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: taxi-producer
+  template:
+    metadata:
+      labels:
+        app: taxi-producer
+    spec:
+      containers:
+        - name: producer
+          image: taxi-producer:latest
+          imagePullPolicy: Never
+          env:
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "platform-kafka-kafka-bootstrap.streaming.svc.cluster.local:9092"
+            - name: KAFKA_TOPIC
+              value: "taxi-rides"
+            - name: EVENTS_PER_SECOND
+              value: "10"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"

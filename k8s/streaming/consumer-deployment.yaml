@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: taxi-consumer
+  namespace: streaming
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: taxi-consumer
+  template:
+    metadata:
+      labels:
+        app: taxi-consumer
+    spec:
+      containers:
+        - name: consumer
+          image: taxi-consumer:latest
+          imagePullPolicy: Never
+          env:
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "platform-kafka-kafka-bootstrap.streaming.svc.cluster.local:9092"
+            - name: KAFKA_TOPIC
+              value: "taxi-rides"
+            - name: S3_ENDPOINT
+              value: "http://localstack.data.svc.cluster.local:4566"
+            - name: S3_BUCKET
+              value: "platform-raw-data"
+            - name: BATCH_SIZE
+              value: "500"
+            - name: FLUSH_INTERVAL_SECONDS
+              value: "30"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"

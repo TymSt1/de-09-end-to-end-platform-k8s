@@ -1,0 +1,36 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: airflow-platform-role
+rules:
+  # Scale deployments (producer/consumer)
+  - apiGroups: ["apps"]
+    resources: ["deployments", "deployments/scale"]
+    verbs: ["get", "list", "patch", "update"]
+  # Create and manage Spark jobs
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "create", "delete", "watch"]
+  # Read pods (for job status)
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: airflow-platform-binding
+subjects:
+  - kind: ServiceAccount
+    name: airflow-scheduler
+    namespace: orchestration
+  - kind: ServiceAccount
+    name: airflow-worker
+    namespace: orchestration
+  - kind: ServiceAccount
+    name: default
+    namespace: orchestration
+roleRef:
+  kind: ClusterRole
+  name: airflow-platform-role
+  apiGroup: rbac.authorization.k8s.io

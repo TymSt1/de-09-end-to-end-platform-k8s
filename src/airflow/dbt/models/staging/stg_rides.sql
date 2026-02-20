@@ -1,0 +1,27 @@
+-- Staging rides: select from source with consistent naming
+select
+    ride_id,
+    event_ts,
+    event_date,
+    event_hour,
+    pickup_zone_id,
+    pickup_zone_name,
+    pickup_borough,
+    dropoff_zone_id,
+    dropoff_zone_name,
+    dropoff_borough,
+    passenger_count,
+    trip_distance_miles,
+    duration_minutes,
+    payment_type,
+    rate_code,
+    fare_amount,
+    tip_amount,
+    tolls_amount,
+    total_amount,
+    fare_per_mile,
+    fare_per_minute,
+    tip_percentage,
+    is_rush_hour,
+    is_weekend
+from {{ source('staging', 'stg_rides') }}

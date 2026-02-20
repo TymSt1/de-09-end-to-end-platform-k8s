@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: data
+  labels:
+    layer: storage
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: streaming
+  labels:
+    layer: ingestion
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: processing
+  labels:
+    layer: compute
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: orchestration
+  labels:
+    layer: orchestration
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: serving
+  labels:
+    layer: presentation
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    layer: observability

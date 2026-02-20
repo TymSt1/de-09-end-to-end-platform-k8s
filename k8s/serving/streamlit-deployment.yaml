@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: streamlit
+  namespace: serving
+  labels:
+    app: streamlit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: streamlit
+  template:
+    metadata:
+      labels:
+        app: streamlit
+    spec:
+      containers:
+        - name: streamlit
+          image: taxi-streamlit:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8501
+          env:
+            - name: DB_HOST
+              value: "postgres.data.svc.cluster.local"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "warehouse"
+            - name: DB_USER
+              value: "platform"
+            - name: DB_PASSWORD
+              value: "platform_secret_2026"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8501
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: streamlit
+  namespace: serving
+spec:
+  selector:
+    app: streamlit
+  ports:
+    - port: 8501
+      targetPort: 8501
+  type: ClusterIP

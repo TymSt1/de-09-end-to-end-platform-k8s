@@ -1,0 +1,12 @@
+taxi_platform:
+  target: prod
+  outputs:
+    prod:
+      type: postgres
+      host: "{{ env_var('WAREHOUSE_HOST', 'postgres.data.svc.cluster.local') }}"
+      port: "{{ env_var('WAREHOUSE_PORT', '5432') | int }}"
+      user: "{{ env_var('WAREHOUSE_USER', 'platform') }}"
+      password: "{{ env_var('WAREHOUSE_PASSWORD', 'platform_secret_2026') }}"
+      dbname: "{{ env_var('WAREHOUSE_DB', 'warehouse') }}"
+      schema: public
+      threads: 2

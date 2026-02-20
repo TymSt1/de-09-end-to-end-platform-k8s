@@ -1,0 +1,87 @@
+# Custom image with dbt, boto3, psycopg, kubectl
+images:
+  airflow:
+    repository: custom-airflow
+    tag: latest
+    pullPolicy: Never
+
+executor: KubernetesExecutor
+
+# Disable the broken create-user job
+createUserJob:
+  enabled: false
+
+# Web UI
+webserver:
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+  service:
+    type: ClusterIP
+
+# Scheduler
+scheduler:
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+
+# Triggerer
+triggerer:
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "250m"
+
+# Airflow metadata DB
+postgresql:
+  enabled: true
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "250m"
+
+# Disable unnecessary components
+flower:
+  enabled: false
+redis:
+  enabled: false
+statsd:
+  enabled: false
+
+# DAGs are baked into the image
+dags:
+  persistence:
+    enabled: false
+
+# Environment variables for our DAGs
+env:
+  - name: WAREHOUSE_HOST
+    value: "postgres.data.svc.cluster.local"
+  - name: WAREHOUSE_PORT
+    value: "5432"
+  - name: WAREHOUSE_DB
+    value: "warehouse"
+  - name: WAREHOUSE_USER
+    value: "platform"
+  - name: WAREHOUSE_PASSWORD
+    value: "platform_secret_2026"
+  - name: S3_ENDPOINT
+    value: "http://localstack.data.svc.cluster.local:4566"
+  - name: RAW_BUCKET
+    value: "platform-raw-data"
+  - name: PROCESSED_BUCKET
+    value: "platform-processed-data"

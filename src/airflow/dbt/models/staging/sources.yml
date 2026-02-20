@@ -1,0 +1,30 @@
+version: 2
+
+sources:
+  - name: staging
+    schema: staging
+    description: "Data loaded from S3 via Spark processing"
+    tables:
+      - name: stg_rides
+        description: "Cleaned taxi ride events"
+        columns:
+          - name: ride_id
+            description: "Unique ride identifier"
+            tests:
+              - not_null
+              - unique
+          - name: total_amount
+            tests:
+              - not_null
+          - name: passenger_count
+            tests:
+              - not_null
+
+      - name: stg_zone_stats
+        description: "Aggregated zone statistics from Spark"
+
+      - name: stg_hourly_stats
+        description: "Hourly aggregations from Spark"
+
+      - name: stg_payment_stats
+        description: "Payment type analysis from Spark"

@@ -1,0 +1,55 @@
+version: 2
+
+models:
+  - name: fact_rides
+    description: "All taxi rides with enriched business categories"
+    columns:
+      - name: ride_id
+        description: "Unique ride identifier"
+        tests:
+          - not_null
+          - unique
+      - name: total_amount
+        tests:
+          - not_null
+      - name: distance_category
+        tests:
+          - accepted_values:
+              values: ['short', 'medium', 'long']
+      - name: fare_category
+        tests:
+          - accepted_values:
+              values: ['budget', 'standard', 'premium']
+      - name: tip_category
+        tests:
+          - accepted_values:
+              values: ['no_tip', 'low_tip', 'standard_tip', 'generous_tip']
+
+  - name: dim_zones
+    description: "Zone performance summary"
+    columns:
+      - name: pickup_zone_id
+        tests:
+          - not_null
+          - unique
+      - name: total_revenue
+        tests:
+          - not_null
+
+  - name: fact_hourly_summary
+    description: "Hourly performance metrics"
+    columns:
+      - name: event_date
+        tests:
+          - not_null
+      - name: trip_count
+        tests:
+          - not_null
+
+  - name: dim_payment_analysis
+    description: "Payment type breakdown"
+    columns:
+      - name: payment_type
+        tests:
+          - not_null
+          - unique
