@@ -3,6 +3,7 @@ Kafka-to-S3 Consumer
 Reads taxi ride events from Kafka and writes them as Parquet files to S3 (LocalStack).
 Batches events and flushes every N records or M seconds.
 """
+
 import json
 import os
 import io
@@ -18,7 +19,9 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 logger = logging.getLogger(__name__)
 
 # Configuration
-BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "platform-kafka-kafka-bootstrap.streaming.svc.cluster.local:9092")
+BOOTSTRAP_SERVERS = os.getenv(
+    "KAFKA_BOOTSTRAP_SERVERS", "platform-kafka-kafka-bootstrap.streaming.svc.cluster.local:9092"
+)
 TOPIC = os.getenv("KAFKA_TOPIC", "taxi-rides")
 GROUP_ID = os.getenv("KAFKA_GROUP_ID", "s3-sink-consumer")
 S3_ENDPOINT = os.getenv("S3_ENDPOINT", "http://localstack.data.svc.cluster.local:4566")
@@ -27,25 +30,27 @@ BATCH_SIZE = int(os.getenv("BATCH_SIZE", "500"))
 FLUSH_INTERVAL_SECONDS = int(os.getenv("FLUSH_INTERVAL_SECONDS", "30"))
 
 # Arrow schema for taxi rides
-SCHEMA = pa.schema([
-    ("ride_id", pa.string()),
-    ("event_timestamp", pa.string()),
-    ("pickup_zone_id", pa.int32()),
-    ("pickup_zone_name", pa.string()),
-    ("pickup_borough", pa.string()),
-    ("dropoff_zone_id", pa.int32()),
-    ("dropoff_zone_name", pa.string()),
-    ("dropoff_borough", pa.string()),
-    ("passenger_count", pa.int32()),
-    ("trip_distance_miles", pa.float64()),
-    ("duration_minutes", pa.float64()),
-    ("payment_type", pa.string()),
-    ("rate_code", pa.string()),
-    ("fare_amount", pa.float64()),
-    ("tip_amount", pa.float64()),
-    ("tolls_amount", pa.float64()),
-    ("total_amount", pa.float64()),
-])
+SCHEMA = pa.schema(
+    [
+        ("ride_id", pa.string()),
+        ("event_timestamp", pa.string()),
+        ("pickup_zone_id", pa.int32()),
+        ("pickup_zone_name", pa.string()),
+        ("pickup_borough", pa.string()),
+        ("dropoff_zone_id", pa.int32()),
+        ("dropoff_zone_name", pa.string()),
+        ("dropoff_borough", pa.string()),
+        ("passenger_count", pa.int32()),
+        ("trip_distance_miles", pa.float64()),
+        ("duration_minutes", pa.float64()),
+        ("payment_type", pa.string()),
+        ("rate_code", pa.string()),
+        ("fare_amount", pa.float64()),
+        ("tip_amount", pa.float64()),
+        ("tolls_amount", pa.float64()),
+        ("total_amount", pa.float64()),
+    ]
+)
 
 
 def create_s3_client():

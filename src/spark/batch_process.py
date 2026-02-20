@@ -3,6 +3,7 @@ Spark Batch Processing Job
 Reads raw taxi ride Parquet files from S3, transforms them,
 and writes aggregated results back to S3.
 """
+
 import os
 import logging
 from pyspark.sql import SparkSession
@@ -20,8 +21,7 @@ PROCESSED_BUCKET = os.getenv("PROCESSED_BUCKET", "platform-processed-data")
 def create_spark_session():
     """Create Spark session configured for S3 (LocalStack)."""
     return (
-        SparkSession.builder
-        .appName("TaxiRideBatchProcessing")
+        SparkSession.builder.appName("TaxiRideBatchProcessing")
         .config("spark.hadoop.fs.s3a.endpoint", S3_ENDPOINT)
         .config("spark.hadoop.fs.s3a.access.key", "test")
         .config("spark.hadoop.fs.s3a.secret.key", "test")
@@ -62,17 +62,16 @@ def clean_data(df):
         # Derived columns
         .withColumn("fare_per_mile", F.round(F.col("fare_amount") / F.col("trip_distance_miles"), 2))
         .withColumn("fare_per_minute", F.round(F.col("fare_amount") / F.col("duration_minutes"), 2))
-        .withColumn("tip_percentage", F.round(
-            F.when(F.col("fare_amount") > 0, F.col("tip_amount") / F.col("fare_amount") * 100)
-            .otherwise(0), 2
-        ))
+        .withColumn(
+            "tip_percentage",
+            F.round(F.when(F.col("fare_amount") > 0, F.col("tip_amount") / F.col("fare_amount") * 100).otherwise(0), 2),
+        )
         # Time-based features
-        .withColumn("is_rush_hour", F.when(
-            (F.col("event_hour").between(7, 9)) | (F.col("event_hour").between(16, 19)), True
-        ).otherwise(False))
-        .withColumn("is_weekend", F.when(
-            F.dayofweek("event_ts").isin(1, 7), True
-        ).otherwise(False))
+        .withColumn(
+            "is_rush_hour",
+            F.when((F.col("event_hour").between(7, 9)) | (F.col("event_hour").between(16, 19)), True).otherwise(False),
+        )
+        .withColumn("is_weekend", F.when(F.dayofweek("event_ts").isin(1, 7), True).otherwise(False))
         # Drop raw timestamp string
         .drop("event_timestamp")
     )
@@ -87,8 +86,7 @@ def compute_zone_aggregations(df):
     logger.info("Computing zone aggregations...")
 
     zone_stats = (
-        df
-        .groupBy("pickup_zone_id", "pickup_zone_name", "pickup_borough")
+        df.groupBy("pickup_zone_id", "pickup_zone_name", "pickup_borough")
         .agg(
             F.count("*").alias("trip_count"),
             F.round(F.avg("total_amount"), 2).alias("avg_total"),
@@ -98,9 +96,7 @@ def compute_zone_aggregations(df):
             F.round(F.sum("total_amount"), 2).alias("total_revenue"),
             F.avg("passenger_count").cast("int").alias("avg_passengers"),
         )
-        .withColumn("rank_by_revenue", F.row_number().over(
-            Window.orderBy(F.desc("total_revenue"))
-        ))
+        .withColumn("rank_by_revenue", F.row_number().over(Window.orderBy(F.desc("total_revenue"))))
     )
 
     logger.info(f"Zone aggregations: {zone_stats.count()} zones")
@@ -112,8 +108,7 @@ def compute_hourly_aggregations(df):
     logger.info("Computing hourly aggregations...")
 
     hourly_stats = (
-        df
-        .groupBy("event_date", "event_hour")
+        df.groupBy("event_date", "event_hour")
         .agg(
             F.count("*").alias("trip_count"),
             F.round(F.avg("total_amount"), 2).alias("avg_total"),
@@ -134,17 +129,16 @@ def compute_payment_analysis(df):
     logger.info("Computing payment analysis...")
 
     payment_stats = (
-        df
-        .groupBy("payment_type")
+        df.groupBy("payment_type")
         .agg(
             F.count("*").alias("trip_count"),
             F.round(F.avg("total_amount"), 2).alias("avg_total"),
             F.round(F.avg("tip_percentage"), 2).alias("avg_tip_pct"),
             F.round(F.sum("total_amount"), 2).alias("total_revenue"),
         )
-        .withColumn("pct_of_trips", F.round(
-            F.col("trip_count") / F.sum("trip_count").over(Window.partitionBy()) * 100, 2
-        ))
+        .withColumn(
+            "pct_of_trips", F.round(F.col("trip_count") / F.sum("trip_count").over(Window.partitionBy()) * 100, 2)
+        )
     )
 
     return payment_stats

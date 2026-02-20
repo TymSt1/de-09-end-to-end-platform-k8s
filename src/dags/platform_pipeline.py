@@ -3,6 +3,7 @@ Platform Pipeline DAG
 Orchestrates the full data flow:
 Producer -> Kafka -> Consumer -> S3 -> Spark -> PostgreSQL -> dbt
 """
+
 from datetime import datetime, timedelta
 import logging
 import time
@@ -80,20 +81,22 @@ def run_spark_job(**kwargs):
             "template": {
                 "spec": {
                     "restartPolicy": "Never",
-                    "containers": [{
-                        "name": "spark",
-                        "image": "taxi-spark:latest",
-                        "imagePullPolicy": "Never",
-                        "env": [
-                            {"name": "S3_ENDPOINT", "value": S3_ENDPOINT},
-                            {"name": "RAW_BUCKET", "value": "platform-raw-data"},
-                            {"name": "PROCESSED_BUCKET", "value": PROCESSED_BUCKET},
-                        ],
-                        "resources": {
-                            "requests": {"memory": "1Gi", "cpu": "500m"},
-                            "limits": {"memory": "2Gi", "cpu": "1000m"},
-                        },
-                    }],
+                    "containers": [
+                        {
+                            "name": "spark",
+                            "image": "taxi-spark:latest",
+                            "imagePullPolicy": "Never",
+                            "env": [
+                                {"name": "S3_ENDPOINT", "value": S3_ENDPOINT},
+                                {"name": "RAW_BUCKET", "value": "platform-raw-data"},
+                                {"name": "PROCESSED_BUCKET", "value": PROCESSED_BUCKET},
+                            ],
+                            "resources": {
+                                "requests": {"memory": "1Gi", "cpu": "500m"},
+                                "limits": {"memory": "2Gi", "cpu": "1000m"},
+                            },
+                        }
+                    ],
                 },
             },
         },
@@ -153,13 +156,30 @@ def load_to_staging(**kwargs):
             "mode": "append",
             "unique_key": "ride_id",
             "columns": [
-                "ride_id", "event_ts", "event_date", "event_hour",
-                "pickup_zone_id", "pickup_zone_name", "pickup_borough",
-                "dropoff_zone_id", "dropoff_zone_name", "dropoff_borough",
-                "passenger_count", "trip_distance_miles", "duration_minutes",
-                "payment_type", "rate_code", "fare_amount", "tip_amount",
-                "tolls_amount", "total_amount", "fare_per_mile",
-                "fare_per_minute", "tip_percentage", "is_rush_hour", "is_weekend",
+                "ride_id",
+                "event_ts",
+                "event_date",
+                "event_hour",
+                "pickup_zone_id",
+                "pickup_zone_name",
+                "pickup_borough",
+                "dropoff_zone_id",
+                "dropoff_zone_name",
+                "dropoff_borough",
+                "passenger_count",
+                "trip_distance_miles",
+                "duration_minutes",
+                "payment_type",
+                "rate_code",
+                "fare_amount",
+                "tip_amount",
+                "tolls_amount",
+                "total_amount",
+                "fare_per_mile",
+                "fare_per_minute",
+                "tip_percentage",
+                "is_rush_hour",
+                "is_weekend",
             ],
             "ddl": """
                 CREATE TABLE IF NOT EXISTS staging.stg_rides (
@@ -194,9 +214,17 @@ def load_to_staging(**kwargs):
             "table": "staging.stg_zone_stats",
             "mode": "replace",
             "columns": [
-                "pickup_zone_id", "pickup_zone_name", "pickup_borough",
-                "trip_count", "avg_total", "avg_tip_pct", "avg_distance",
-                "avg_duration", "total_revenue", "avg_passengers", "rank_by_revenue",
+                "pickup_zone_id",
+                "pickup_zone_name",
+                "pickup_borough",
+                "trip_count",
+                "avg_total",
+                "avg_tip_pct",
+                "avg_distance",
+                "avg_duration",
+                "total_revenue",
+                "avg_passengers",
+                "rank_by_revenue",
             ],
             "ddl": """
                 CREATE TABLE IF NOT EXISTS staging.stg_zone_stats (
@@ -218,8 +246,14 @@ def load_to_staging(**kwargs):
             "table": "staging.stg_hourly_stats",
             "mode": "replace",
             "columns": [
-                "event_date", "event_hour", "trip_count", "avg_total",
-                "hourly_revenue", "avg_distance", "avg_duration", "total_passengers",
+                "event_date",
+                "event_hour",
+                "trip_count",
+                "avg_total",
+                "hourly_revenue",
+                "avg_distance",
+                "avg_duration",
+                "total_passengers",
             ],
             "ddl": """
                 CREATE TABLE IF NOT EXISTS staging.stg_hourly_stats (
@@ -238,8 +272,12 @@ def load_to_staging(**kwargs):
             "table": "staging.stg_payment_stats",
             "mode": "replace",
             "columns": [
-                "payment_type", "trip_count", "avg_total", "avg_tip_pct",
-                "total_revenue", "pct_of_trips",
+                "payment_type",
+                "trip_count",
+                "avg_total",
+                "avg_tip_pct",
+                "total_revenue",
+                "pct_of_trips",
             ],
             "ddl": """
                 CREATE TABLE IF NOT EXISTS staging.stg_payment_stats (
@@ -296,7 +334,7 @@ def load_to_staging(**kwargs):
 
                 # Batch execute for speed
                 for i in range(0, len(rows), batch_size):
-                    batch = rows[i:i + batch_size]
+                    batch = rows[i : i + batch_size]
                     cur.executemany(insert_sql, batch)
 
                 conn.commit()

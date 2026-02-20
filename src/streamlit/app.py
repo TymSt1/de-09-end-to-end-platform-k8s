@@ -2,6 +2,7 @@
 NYC Taxi Data Platform Dashboard
 Reads from dbt marts in PostgreSQL
 """
+
 import os
 import streamlit as st
 import pandas as pd
@@ -44,7 +45,9 @@ st.title("🚕 NYC Taxi Data Platform")
 st.markdown("Real-time analytics from the end-to-end data pipeline: **Kafka → S3 → Spark → dbt → PostgreSQL**")
 
 # --- KPIs ---
-rides = run_query("SELECT COUNT(*) as total_rides, ROUND(AVG(total_amount)::numeric, 2) as avg_fare, ROUND(SUM(total_amount)::numeric, 2) as total_revenue, SUM(passenger_count) as total_passengers FROM public_marts.fact_rides")
+rides = run_query(
+    "SELECT COUNT(*) as total_rides, ROUND(AVG(total_amount)::numeric, 2) as avg_fare, ROUND(SUM(total_amount)::numeric, 2) as total_revenue, SUM(passenger_count) as total_passengers FROM public_marts.fact_rides"
+)
 
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Total Rides", f"{rides['total_rides'].iloc[0]:,}")
@@ -208,4 +211,6 @@ st.plotly_chart(fig_flow, use_container_width=True)
 
 # --- Footer ---
 st.divider()
-st.caption("Data pipeline: Kafka (streaming) → S3/LocalStack (storage) → Spark (processing) → dbt (transformation) → PostgreSQL (warehouse) | Orchestrated by Airflow on Kubernetes")
+st.caption(
+    "Data pipeline: Kafka (streaming) → S3/LocalStack (storage) → Spark (processing) → dbt (transformation) → PostgreSQL (warehouse) | Orchestrated by Airflow on Kubernetes"
+)

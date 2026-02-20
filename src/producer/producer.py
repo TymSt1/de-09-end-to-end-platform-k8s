@@ -2,6 +2,7 @@
 NYC Taxi Ride Event Producer
 Generates synthetic taxi ride events and publishes them to Kafka.
 """
+
 import json
 import random
 import time
@@ -14,7 +15,9 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 logger = logging.getLogger(__name__)
 
 # Configuration from environment
-BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "platform-kafka-kafka-bootstrap.streaming.svc.cluster.local:9092")
+BOOTSTRAP_SERVERS = os.getenv(
+    "KAFKA_BOOTSTRAP_SERVERS", "platform-kafka-kafka-bootstrap.streaming.svc.cluster.local:9092"
+)
 TOPIC = os.getenv("KAFKA_TOPIC", "taxi-rides")
 EVENTS_PER_SECOND = int(os.getenv("EVENTS_PER_SECOND", "10"))
 
