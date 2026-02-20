@@ -61,10 +61,10 @@ left, right = st.columns(2)
 with left:
     st.subheader("📍 Top Zones by Revenue")
     zones = run_query("""
-        SELECT pickup_zone_name, total_trips, avg_fare, 
+        SELECT pickup_zone_name, total_trips, avg_fare,
                total_revenue, avg_tip_pct, revenue_rank
-        FROM public_marts.dim_zones 
-        ORDER BY revenue_rank 
+        FROM public_marts.dim_zones
+        ORDER BY revenue_rank
         LIMIT 10
     """)
 
@@ -130,9 +130,9 @@ with left2:
     distances = run_query("""
         SELECT distance_category, COUNT(*) as count,
                ROUND(AVG(total_amount)::numeric, 2) as avg_fare
-        FROM public_marts.fact_rides 
+        FROM public_marts.fact_rides
         GROUP BY distance_category
-        ORDER BY CASE distance_category 
+        ORDER BY CASE distance_category
             WHEN 'short' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END
     """)
 
@@ -156,9 +156,9 @@ with right2:
     fares = run_query("""
         SELECT fare_category, COUNT(*) as count,
                ROUND(AVG(tip_percentage)::numeric, 2) as avg_tip_pct
-        FROM public_marts.fact_rides 
+        FROM public_marts.fact_rides
         GROUP BY fare_category
-        ORDER BY CASE fare_category 
+        ORDER BY CASE fare_category
             WHEN 'budget' THEN 1 WHEN 'standard' THEN 2 ELSE 3 END
     """)
 
